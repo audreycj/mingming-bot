@@ -518,7 +518,7 @@ const patches3 = (uid) => discord.calls.filter((x) => x.method === "PATCH" && x.
 const form3 = (uid, f, l, e) => ({ type: 5, guild_id: G3, member: student(uid), data: { custom_id: "regform:list", components: [["first", f], ["middle", ""], ["last", l], ["suffix", ""], ["email", e]].map(([id, v]) => ({ type: 1, components: [{ type: 4, custom_id: id, value: v }] })) } });
 await send(cmd3("setup", [{ name: "course_name", value: "IT 110: Introduction to Computing" }, { name: "student_role", value: STUDENT }, { name: "name_format", value: "last_first" }], role(STUDENT, "Student")));
 await send(cmd3("retire-role", [{ name: "role", value: "902" }], role("902", "1A (unregistered)")));
-[o, res] = attach("it110.csv", "ID No.,Last Name,First Name,M.I.,Ext.,Section\n2025-1001,LOPEZ,CARLO,M.,,IT1A\n");
+[o, res] = attach("it110.csv", "ID No.,Last Name,First Name,M.I.,Ext.,Section\n0000-0001,LOPEZ,CARLO,M.,,IT1A\n");
 r = await send(cmd3("import-classlist", o, res)); await settle();
 check("[One section] Import works without sections set up (Section column ignored)", followUp(r.token).includes("Imported **1** students. 😺"), followUp(r.token).split("\n")[0]);
 r = await send(cmd3("post-register")); await settle();
