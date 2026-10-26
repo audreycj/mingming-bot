@@ -1,5 +1,7 @@
 # Moving ITC 120 and IT 110 to Mingming (this semester)
 
+> **About this guide:** I wrote this for my own two class servers, which already had students in them and used an older bot (Carl-bot) for section roles. It's kept here as a worked example of moving a live server to Mingming without cutting anyone off. "You" means the instructor doing the move. To set up a **new** server instead, follow [Step 9 of the README](README.md#step-9-set-up-each-course-server).
+
 Goal: tidy nicknames, collect emails, and put every ITC 120 student in the section your class list says, **without cutting anyone off from your announcements**.
 
 How it works once done:

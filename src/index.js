@@ -1131,7 +1131,7 @@ export function buildPanel(server, sections, instructorId, hasList = false, styl
       : [button("Register", "reg:none")];
   const sectioned = sections.length > 0;
   // A tappable mention of the instructor. (Phone apps may show it as the username,
-  // e.g. @acj.nanual, instead of the server nickname; Discord controls that.)
+  // e.g. @their.username, instead of the server nickname; Discord controls that.)
   const instructor = instructorId ? `your instructor, <@${instructorId}>` : "your instructor";
   const again = style === "reregister";
 

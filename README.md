@@ -1,17 +1,64 @@
-# Mingming 🐱 Setup Guide (Cloudflare Workers)
+# Mingming 🐱
 
-This is a one-time setup, about an hour. After this, Mingming runs on Cloudflare for free with nothing to keep running on your Mac.
+**A Discord registration bot for class servers.** Students click **Register**, type their complete name and email, and Mingming gives them a proper full-name nickname, puts them in the right section, and unlocks their class channels. It runs on Cloudflare Workers, so there's no server to keep running.
 
-## How Mingming works
+<p>
+  <img src="screenshots/phone-form.webp" alt="The registration form on a phone: complete first name, middle name, last name, suffix, and email" width="30%">
+  <img src="screenshots/phone-done.webp" alt="Mingming's private confirmation message after registering" width="44%">
+</p>
 
-When a student clicks a button in Discord, Discord sends a message to Mingming's web address on Cloudflare. Cloudflare wakes Mingming up, Mingming does the job (sets the nickname, gives the roles, saves the email), and goes back to sleep. That's why Mingming shows a gray "offline" dot in Discord, but it still works.
+<img src="screenshots/welcome-panel.webp" alt="The registration panel in a class server's #welcome channel, with one button per section" width="75%">
+
+## Why I built it
+
+I'm an IT instructor, and I use Discord as the main way to communicate with my students. With a hundred or more students across several sections, I need to know who is who, but asking everyone to rename themselves to their full name never fully worked: the member list stayed full of nicknames and usernames, and students sometimes picked the wrong section. Mingming makes registration a one-minute form instead of a set of instructions.
+
+## What it does
+
+These are the main features:
+
+- **Uniform nicknames.** Names are formatted in the Philippine records style (*Last, First Suffix M.I.*), shortened smartly to fit Discord's 32-character limit, with the full name kept in the records.
+- **Section assignment from the class list.** The instructor uploads the official class list as a CSV. Mingming finds each student on it (tolerating letter case, ñ, small typos, and first and last names typed in the wrong boxes) and assigns the section from the list, so students can't pick the wrong one.
+- **Respect for the student's own spelling.** Registrar lists sometimes misspell names. When a student's spelling differs from the list, Mingming keeps the student's version, tells them how to get the record checked, and flags it for the instructor.
+- **Instructor alerts.** Registrations that need a second look (not on the list, or spelled differently) ping the instructor in a private channel.
+- **Email collection** for contacting students about grades, downloadable only by the instructor.
+- **No lockouts.** Existing servers can be moved to Mingming without cutting anyone off from announcements; `/unregistered` lists who still needs a nudge.
+- **11 instructor-only slash commands** for setup, sections, class lists, exports, and resets.
+
+<img src="screenshots/commands.webp" alt="Mingming's 11 instructor commands in Discord's command list" width="60%">
+
+## How it works
+
+Mingming uses Discord's **HTTP interactions**: when someone clicks a button, submits the form, or runs a command, Discord sends a request to Mingming's web address on Cloudflare. Cloudflare wakes Mingming up, Mingming does the job (sets the nickname, gives the roles, saves the details), and goes back to sleep. That's why Mingming shows a gray "offline" dot in Discord, but it still works.
+
+**Built with:** JavaScript, Cloudflare Workers, Cloudflare D1 (SQLite), and the Discord Interactions API. No framework and no runtime dependencies; the only dev dependency is Wrangler, Cloudflare's deploy tool.
+
+**Tested with:** 142 automatic checks (`npm test`) that run the real Worker code against an in-memory database and a fake Discord, including Discord permission errors, slow responses, duplicate submissions, and database failures. All names and emails in the tests are made up.
+
+## Privacy
+
+Student data (names, emails, sections) is stored only in the instructor's own Cloudflare D1 database, and only members with the **Manage Server** permission can export it. No student data is included in this repository, and class lists are meant to be kept outside the project folder.
+
+## Status
+
+Mingming runs in three of my class servers: two that were moved from an older bot (see [MIGRATION.md](MIGRATION.md)) and one set up from scratch (see Step 9 below).
+
+## Credits
+
+Built by Audrey Nanual, with help from Claude (Anthropic) for code and documentation.
+
+---
+
+# Setting up your own Mingming
+
+The rest of this README is the full setup guide. It's a one-time setup, about an hour. After this, Mingming runs on Cloudflare for free, with nothing to keep running on your computer.
 
 ## What you need
 
-- Your Mac
+- A computer with **Terminal** (the steps below use macOS; Linux works the same way, and Windows works with small changes)
 - **Node.js** version 22.13 or newer: download the LTS version from https://nodejs.org and install it
 - A free **Cloudflare** account: https://dash.cloudflare.com/sign-up
-- The `mingming-avatar.png` file
+- The `mingming-avatar.png` file from this repository (or your own picture)
 
 ---
 
@@ -30,12 +77,15 @@ When a student clicks a button in Discord, Discord sends a message to Mingming's
 
 ## Step 2: Install the project
 
-Open **Terminal** and go to the Mingming folder (adjust the path if you saved it elsewhere):
+Open **Terminal**, download the project, and install its one tool (Wrangler):
 
 ```bash
-cd ~/Documents/Projects/mingming-bot
+git clone https://github.com/audreycj/mingming-bot.git
+cd mingming-bot
 npm install
 ```
+
+(Already have the folder? Just `cd` into it and run `npm install`.) Run every command in this guide from inside this folder.
 
 ## Step 3: Connect to Cloudflare
 
@@ -51,9 +101,7 @@ A browser window opens. Log in to Cloudflare and click **Allow**.
 npx wrangler d1 create mingming-db
 ```
 
-(If you ever set up an earlier test version of Mingming, start with a fresh database: the tables have changed, and re-running the setup won't update old ones. Since no real students are registered yet, nothing is lost.)
-
-The output includes a line like `database_id = "abc123..."`. Open `wrangler.toml` in any text editor and replace `PASTE-YOUR-DATABASE-ID-HERE` with that ID. Then create the tables:
+The output includes a line like `database_id = "abc123..."`. Open `wrangler.toml` in any text editor and replace the `database_id` value with yours. (The ID already in the file belongs to the original deployment; it's useless without that Cloudflare account's login, but your copy needs your own.) Then create the tables:
 
 ```bash
 npm run db:init
@@ -279,7 +327,7 @@ In the Mingming folder, run:
 npm test
 ```
 
-This runs 142 automatic checks in about 5 seconds, entirely on your Mac. It uses a pretend Discord and a pretend database, so it never touches your real server, your Cloudflare database, or any of your files. Failures like Discord errors, database outages, and slow responses are simulated on purpose. The last line should read `142 passed, 0 failed`.
+This runs 142 automatic checks in about 5 seconds, entirely on your computer. It uses a pretend Discord and a pretend database, so it never touches your real server, your Cloudflare database, or any of your files. Failures like Discord errors, database outages, and slow responses are simulated on purpose. The last line should read `142 passed, 0 failed`.
 
 ## Known limits
 
