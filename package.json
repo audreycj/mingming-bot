@@ -1,0 +1,14 @@
+{
+  "name": "mingming",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "db:init": "wrangler d1 execute mingming-db --remote --file=schema.sql",
+    "register": "node register-commands.mjs",
+    "test": "node --no-warnings test/run.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

@@ -1,0 +1,8 @@
+name = "mingming"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "mingming-db"
+database_id = "7ab9aa4c-c34e-4c72-84af-ac1e24493315"
